@@ -1,0 +1,31 @@
+# Node / tooling
+node_modules/
+
+# PHP / Composer
+vendor/
+composer.lock
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# XAMPP / local database files (DO NOT commit MySQL data)
+/xampp/mysql/data/
+/mysql/data/
+# SQL dumps
+*.sql
+
+# Environment / secrets
+.env
+config.php
+*.pem
+
+# Uploads and runtime file storage (exclude user content)
+/uploads/
+
+# Logs
+*.log

@@ -1,0 +1,273 @@
+/* Global styles for navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 16px 32px; /* Standardized padding */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+}
+
+.navbar .logo {
+  font-size: 24px; /* Standardized font size */
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  display: flex; /* Added for logo image */
+  align-items: center; /* Added for logo image */
+  gap: 8px; /* Added for logo image */
+}
+
+.navbar .logo img { /* Specific to front page, but can be global if all logos are images */
+  height: 60px;   
+  width: auto;
+  object-fit: contain; 
+}
+
+.navbar .logo span { /* Specific to front page, but can be global */
+  font-size: 22px;
+  font-weight: bold;
+  color: white;
+}
+
+.navbar .nav-links {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+/* Dropdown styles */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropbtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: white;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  min-width: 160px;
+  border-radius: 12px;
+  padding: 8px 0;
+  z-index: 1;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown:hover .dropdown-content {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dropdown-content a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.dropdown-content a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Menu toggle for mobile */
+.menu-toggle {
+  display: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+}
+
+/* unify alignment / sizing for links and nav buttons */
+.navbar .nav-links a,
+.navbar .nav-links button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 6px 12px;
+  border-radius: 18px;
+  line-height: 1;
+}
+
+/* keep normal links visually simple */
+.navbar .nav-links a {
+  background: transparent;
+  border: none;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ensure the logout button keeps its intended styling but matches sizing */
+.navbar .nav-links .logout-btn {
+  min-width: 0;
+  padding: 6px 14px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(90deg, #ff5858 0%, #f09819 100%);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  border-radius: 20px;
+  padding: 6px 16px 6px 14px;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1.5px 6px rgba(0,0,0,0.10);
+  transition: background 0.25s, box-shadow 0.25s, transform 0.18s;
+  outline: none;
+  min-width: 0;
+  height: 38px;
+  line-height: 1;
+}
+.logout-btn i {
+  font-size: 1.15em;
+  margin-right: 2px;
+  display: flex;
+  align-items: center;
+}
+.logout-btn span {
+  letter-spacing: 0.2px;
+  font-size: 1em;
+  font-weight: 500;
+}
+.logout-btn:hover, .logout-btn:focus {
+  background: linear-gradient(90deg, #f09819 0%, #ff5858 100%);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+  transform: translateY(-1.5px) scale(1.035);
+  color: #fff;
+}
+
+.logout-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.10);
+}
+.logout-btn:disabled {
+  background: rgba(200,200,200,0.4);
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.login-btn {
+  background: linear-gradient(90deg, #ff9900, #ff4d00);
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-weight: 600;
+  color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 150, 50, 0.4);
+  border: none;
+}
+
+.login-btn:hover {
+  background: linear-gradient(90deg, #ffb800, #ff6600);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(255, 150, 50, 0.6);
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: flex;
+    flex-direction: column;
+    background: #111;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+  }
+  .nav-links a {
+    margin: 10px 0;
+  }
+}
+.size-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #222 url("data:image/svg+xml,%3Csvg width='16' height='16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 1rem center/1.2em;
+  color: #fff;
+  border: 1.5px solid #444;
+  border-radius: 8px;
+  padding: 8px 2.5em 8px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 500;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.size-select:focus {
+  border-color: #f09819;
+  box-shadow: 0 0 0 2px rgba(240,152,25,0.15);
+}
+
+.size-select option {
+  color: #222;
+  background: #fff;
+}
+
+        /* Go Back Button Styling */
+        .go-back-btn {
+            position: fixed;
+            left: 25px;
+            top: 25px;
+            background: linear-gradient(90deg, #ff9900, #ff4d00);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 100, 0, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .go-back-btn:hover {
+            background: linear-gradient(90deg, #ffb800, #ff6600);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(255, 120, 0, 0.6);
+        }
+
+        .go-back-btn i {
+            font-size: 18px;
+        }
+
+        /* Optional: to avoid overlap with mobile screens */
+        @media (max-width: 600px) {
+            .go-back-btn {
+                left: 15px;
+                top: 15px;
+                padding: 8px 15px;
+                font-size: 13px;
+            }
+        }
+        
