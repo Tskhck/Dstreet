@@ -51,14 +51,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
     
+    // Ensure columns exist (username, status) for legacy form path
     try {
-        $sql = "INSERT INTO orders (product_type, size, quantity, design_path, notes, order_date) 
-                VALUES (?, ?, ?, ?, ?, NOW())";
+        $cols = $con->query("SHOW COLUMNS FROM orders")->fetchAll(PDO::FETCH_COLUMN,0);
+        $addCols = [];
+        if (!in_array('username',$cols)) $addCols[] = "ADD COLUMN username VARCHAR(255) NULL";
+        if (!in_array('status',$cols)) $addCols[] = "ADD COLUMN status VARCHAR(50) NULL";
+        if (!empty($addCols)) {
+            $con->exec("ALTER TABLE orders " . implode(',', $addCols));
+        }
+    } catch(Exception $e) {
+        // Non-fatal
+    }
+    $usernameSession = isset($_SESSION['username']) ? $_SESSION['username'] : null;
+    try {
+        $sql = "INSERT INTO orders (username, status, product_type, size, quantity, design_path, notes, order_date) 
+                VALUES (?, 'to_ship', ?, ?, ?, ?, ?, NOW())";
         $stmt = $con->prepare($sql);
-        $stmt->execute([$product_type, $size, $quantity, $design_path, $notes]);
+        $stmt->execute([$usernameSession, $product_type, $size, $quantity, $design_path, $notes]);
         
         $_SESSION['success_message'] = "Order submitted successfully!";
-        header("Location: home.php");
+    header("Location: account.php?show=to_ship");
         exit();
     } catch(PDOException $e) {
         $_SESSION['error_message'] = "Error submitting order. Please try again.";

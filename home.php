@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once __DIR__ . '/admin/admin_connection.php';
 
 try {
@@ -7,6 +8,7 @@ try {
 } catch (Exception $e) {
   $products = [];
 }
+$isAdmin = (isset($_SESSION['username']) && $_SESSION['username'] === 'admin');
 ?>
 
 <!DOCTYPE html>
@@ -32,8 +34,13 @@ try {
     <div class="nav-links">
       <a href="home.php">Home</a>
       <a href="#collections">Shop</a>
-      <a href="order.php">Order</a>
+      <?php if (!$isAdmin): ?>
+        <a href="order.php" id="cartNavLink">Order <span id="cartCount" class="cart-count" style="display:none;">0</span></a>
+      <?php endif; ?>
       <a href="account.php">Account</a>
+      <?php if ($isAdmin): ?>
+        <a href="admin/add_product.php" style="background:#32CDD5;padding:8px 16px;border-radius:20px;color:#000;font-weight:600;">Admin</a>
+      <?php endif; ?>
       <a href="landing.php" onclick="confirmLogout(event, this)">Logout</a>
     </div>
   </nav>
@@ -52,12 +59,19 @@ try {
 
       <?php if (!empty($products)): ?>
         <?php foreach ($products as $product): ?>
-          <div class="product-card">
-            <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+          <?php 
+            $pName = htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8');
+            $pDesc = htmlspecialchars($product['description'] ?? '', ENT_QUOTES, 'UTF-8');
+            $pImg  = htmlspecialchars($product['image'] ?? '', ENT_QUOTES, 'UTF-8');
+            $pPrice = (float)($product['price'] ?? 0);
+          ?>
+          <div class="product-card" data-name="<?php echo $pName; ?>" data-price="<?php echo number_format($pPrice,2,'.',''); ?>" data-image="<?php echo $pImg; ?>">
+            <img src="<?php echo $pImg; ?>" alt="<?php echo $pName; ?>">
             <div class="info">
-              <h3><?php echo htmlspecialchars($product['name']); ?></h3>
-              <p><?php echo htmlspecialchars($product['description']); ?></p>
-              <button onclick="addToCart('<?php echo htmlspecialchars(addslashes($product['name'])); ?>', this)">Add to Cart</button>
+              <h3><?php echo $pName; ?></h3>
+              <p><?php echo $pDesc; ?></p>
+              <span class="price">₱<?php echo number_format($pPrice, 2); ?></span>
+              <button class="add-to-cart-btn" type="button">Add to Cart</button>
             </div>
           </div>
         <?php endforeach; ?>
@@ -72,36 +86,78 @@ try {
     // Show notification when item is added to cart
     function showNotification(message) {
       const popup = document.getElementById("popup");
+      if (!popup) { console.warn('[HOME] popup element missing'); return; }
       popup.textContent = message;
-      popup.classList.add("show");
-      setTimeout(() => popup.classList.remove("show"), 2000);
+      // Inline fallback in case CSS not loaded yet
+      popup.style.visibility = 'visible';
+      popup.style.opacity = '1';
+      popup.style.transform = 'translateY(0)';
+      popup.style.zIndex = '3000';
+      popup.classList.add('show');
+      console.log('[HOME] Notification shown:', message, popup.getBoundingClientRect());
+      setTimeout(() => {
+        popup.classList.remove('show');
+        popup.style.opacity = '0';
+        popup.style.visibility = 'hidden';
+      }, 2200);
     }
 
-    // Add item to cart
-    function addToCart(name, button) {
-      const productCard = button.closest('.product-card');
-      const image = productCard.querySelector('img').src;
-      
-      // Get cart from storage or create new
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      
-      // Find if product already exists
-      const existingProduct = cart.find(item => item.name === name);
-      
-      if (existingProduct) {
-        existingProduct.quantity++;
+    // Add item to cart (delegated)
+    function addToCart(productCard) {
+      const name = productCard.getAttribute('data-name');
+      const price = parseFloat(productCard.getAttribute('data-price')) || 0;
+      const image = productCard.getAttribute('data-image') || productCard.querySelector('img').src;
+      let cart;
+      try { cart = JSON.parse(localStorage.getItem('cart') || '[]'); } catch(e) { cart = []; }
+      const existing = cart.find(i => i.name === name);
+      if (existing) {
+        existing.quantity = (existing.quantity||0) + 1;
       } else {
-        cart.push({
-          name: name,
-          image: image,
-          quantity: 1
-        });
+        cart.push({ name, image, price, quantity:1 });
       }
-      
-      // Save cart and show notification
       localStorage.setItem('cart', JSON.stringify(cart));
+      console.log('[HOME] Cart after add:', cart);
+      updateCartBadge(cart);
+      updateCartCount(cart);
       showNotification(name + ' added to cart!');
     }
+
+    function updateCartBadge(cart) {
+      let badge = document.getElementById('cartBadge');
+      if (!badge) {
+        const a = document.createElement('span');
+        a.id = 'cartBadge';
+        a.style.position='fixed';
+        a.style.bottom='12px';
+        a.style.left='12px';
+        a.style.background='#32CDD5';
+        a.style.color='#000';
+        a.style.padding='6px 10px';
+        a.style.borderRadius='6px';
+        a.style.fontSize='12px';
+        a.style.zIndex='1000';
+        document.body.appendChild(a);
+        badge = a;
+      }
+      const totalQty = cart.reduce((sum,i)=>sum + (i.quantity||0),0);
+      badge.textContent = 'Cart items: ' + totalQty;
+    }
+    function updateCartCount(cart) {
+      const span = document.getElementById('cartCount');
+      if (!span) return;
+      const totalQty = cart.reduce((sum,i)=>sum + (i.quantity||0),0);
+      span.textContent = totalQty;
+      span.style.display = totalQty > 0 ? 'inline-block' : 'none';
+    }
+    // Initialize badge on load if existing cart
+    try { const existing = JSON.parse(localStorage.getItem('cart')||'[]'); updateCartBadge(existing); updateCartCount(existing);} catch(e) {}
+    // Delegated click for all add-to-cart buttons
+    document.addEventListener('click', function(ev){
+      if (ev.target && ev.target.classList.contains('add-to-cart-btn')) {
+        const card = ev.target.closest('.product-card');
+        if (card) { addToCart(card); }
+      }
+    });
 
     // Confirm before logout
     function confirmLogout(event, link) {
@@ -244,6 +300,32 @@ try {
     function goToOrderForm() {
       window.location.href = 'order_form.php';
     }
+  </script>
+  <!-- Diagnostics instrumentation -->
+  <script>
+  (function(){
+    try {
+      const inventory = Array.from(document.scripts).map((s,i)=>({index:i, src:s.getAttribute('src')||null, inlineLength:(s.text||'').length}));
+      console.log('[DIAG] Script inventory on home.php:', inventory);
+      window.addEventListener('error', function(ev){
+        console.log('[DIAG] Global error caught:', ev.message, 'at', ev.filename, ev.lineno+':'+ev.colno);
+      });
+      // Ensure popup exists even if earlier markup failed to load
+      if(!document.getElementById('popup')) {
+        const p=document.createElement('div');
+        p.id='popup';
+        p.className='popup';
+        p.textContent='Popup (reconstructed)';
+        p.style.visibility='hidden';
+        document.body.appendChild(p);
+        console.log('[DIAG] Popup element reconstructed');
+      }
+      // Log localStorage cart raw value early
+      console.log('[DIAG] Initial cart raw:', localStorage.getItem('cart'));
+    } catch(e){
+      console.log('[DIAG] Instrumentation failed:', e);
+    }
+  })();
   </script>
 </body>
 </html>

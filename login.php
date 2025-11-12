@@ -38,10 +38,15 @@
                     }
 
                     if ($password_ok) {
-                        // Credentials valid — set session and redirect to home
+                        // Credentials valid — set session and redirect
                         session_regenerate_id(true);
                         $_SESSION['username'] = $username;
-                        header('Location: home.php');
+                        // Admin goes to add product page, regular users to home
+                        if ($username === 'admin') {
+                            header('Location: admin/add_product.php');
+                        } else {
+                            header('Location: home.php');
+                        }
                         exit;
                     } else {
                         $login_error = 'Incorrect password.';

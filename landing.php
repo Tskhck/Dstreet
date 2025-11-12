@@ -1,3 +1,13 @@
+<?php
+require_once __DIR__ . '/admin/admin_connection.php';
+
+try {
+  $stmt = $con->query("SELECT * FROM products ORDER BY created_at DESC");
+  $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+  $products = [];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,56 +50,29 @@
     <h2>Featured Collections</h2>
     <div class="products-grid">
 
-      <div class="product-card">
-        <img src="example1.jpg" alt="Streetwear Hoodie">
-        <div class="info">
-          <h3>Streetwear Hoodie</h3>
-          <p>Premium cotton blend</p>
-
-          <select class="size-select" onchange="updatePrice(this)">
-            <option value="1299">Small - ₱1,299</option>
-            <option value="1399">Medium - ₱1,399</option>
-            <option value="1499">Large - ₱1,499</option>
-          </select>
-
-          <span class="price">₱1,299.00</span>
-          <button onclick="addToCart('Streetwear Hoodie', this)">Add to Cart</button>
-        </div>
-      </div>
-
-      <div class="product-card">
-        <img src="example4.jpg" alt="Asian Size Normal Shirt">
-        <div class="info">
-          <h3>Asian Size Normal Shirt</h3>
-          <p>Exclusive design drop</p>
-
-          <select class="size-select" onchange="updatePrice(this)">
-            <option value="799">Small - ₱799</option>
-            <option value="899">Medium - ₱899</option>
-            <option value="999">Large - ₱999</option>
-          </select>
-
-          <span class="price">₱799.00</span>
-          <button onclick="addToCart('Asian Size Normal Shirt', this)">Add to Cart</button>
-        </div>
-      </div>
-
-      <div class="product-card">
-        <img src="example5.jpg" alt="Pro Club Inspired Oversized">
-        <div class="info">
-          <h3>Pro Club Inspired Oversized</h3>
-          <p>Classic sporty vibe</p>
-
-          <select class="size-select" onchange="updatePrice(this)">
-            <option value="1999">Small - ₱1,999</option>
-            <option value="2099">Medium - ₱2,099</option>
-            <option value="2199">Large - ₱2,199</option>
-          </select>
-
-          <span class="price">₱1,999.00</span>
-          <button onclick="addToCart('Pro Club Inspired Oversized', this)">Add to Cart</button>
-        </div>
-      </div>
+      <?php if (!empty($products)): ?>
+        <?php foreach ($products as $product): ?>
+          <?php 
+            $pName = htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8');
+            $pDesc = htmlspecialchars($product['description'] ?? '', ENT_QUOTES, 'UTF-8');
+            $pImg  = htmlspecialchars($product['image'] ?? '', ENT_QUOTES, 'UTF-8');
+            $pPrice = (float)($product['price'] ?? 0);
+            $pSize = htmlspecialchars($product['size'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
+          ?>
+          <div class="product-card">
+            <img src="<?php echo $pImg; ?>" alt="<?php echo $pName; ?>">
+            <div class="info">
+              <h3><?php echo $pName; ?></h3>
+              <p><?php echo $pDesc; ?></p>
+              <p style="font-size:14px;color:#aaa;">Size: <?php echo $pSize; ?></p>
+              <span class="price">₱<?php echo number_format($pPrice, 2); ?></span>
+              <button onclick="promptLogin()">Add to Cart</button>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <p>No products available.</p>
+      <?php endif; ?>
 
     </div>
   </section>
@@ -141,13 +124,7 @@
   </footer>
 
 <script>
-function updatePrice(selectEl) {
-  const priceSpan = selectEl.parentElement.querySelector(".price");
-  const price = parseInt(selectEl.value);
-  priceSpan.textContent = "₱" + price.toLocaleString() + ".00";
-}
-
-function addToCart(name, buttonEl) {
+function promptLogin() {
   const popup = document.getElementById("popup");
   popup.textContent = "Please login first to add items to your cart.";
   popup.classList.add("show");
@@ -155,7 +132,7 @@ function addToCart(name, buttonEl) {
   setTimeout(() => {
     popup.classList.remove("show");
     window.location.href = "login.php";
-  }, 500);
+  }, 1500);
 }
 </script>
 
