@@ -8,6 +8,7 @@ composer.lock
 # IDEs
 .vscode/
 .idea/
+vs-backup-*/
 
 # OS files
 Thumbs.db
